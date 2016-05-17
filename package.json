@@ -24,5 +24,10 @@
   "bugs": {
     "url": "https://github.com/AlexWang1987/promisify-npm/issues"
   },
-  "homepage": "https://github.com/AlexWang1987/promisify-npm#readme"
+  "homepage": "https://github.com/AlexWang1987/promisify-npm#readme",
+  "dependencies": {
+    "npm": "3.9.0",
+    "promisify-bash": "1.0.2",
+    "promisify-fetch": "1.0.3"
+  }
 }
