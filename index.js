@@ -1,6 +1,5 @@
 var Promise = require('bluebird');
 var npm = require('npm');
-var path = require('path');
 
 /**
  * expose interface
@@ -27,7 +26,6 @@ pnpm.getPkgInfo = function(pkg_name) {
     .then(function(kvInfo) {
       return kvInfo[Object.keys(kvInfo)[0]]
     })
-
 }
 
 pnpm.install = function(pkgs, where) {
