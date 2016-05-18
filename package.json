@@ -28,6 +28,6 @@
   "dependencies": {
     "npm": "3.9.0",
     "promisify-bash": "1.0.2",
-    "promisify-fetch": "1.0.3"
+    "promisify-fs": "1.0.5"
   }
 }

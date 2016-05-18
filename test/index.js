@@ -1,8 +1,7 @@
 var npm = require('../index.js');
 
-/*
 npm
-  .getPkgInfo('reac1t')
+  .hasInstall('promisify-git','/Users/AlexWang/xx')
   .then(function(d) {
     console.log(d.name,
     d.version,
@@ -11,15 +10,9 @@ npm
   .catch(function(e) {
     console.log('exits');
   })
-*/
 
-
-
-npm
-  .install(['promisify-git'],'/Users/AlexWang/xx')
-  .then(function(d) {
-    console.log(d,'sdfdsfdscu');
-  })
-  .catch(function(e) {
-    console.log(e);
-  })
+// npm
+//   .initDefaultPkg()
+//   .then(function(d) {
+//     console.log(d ,'-----<>---');
+//   })
