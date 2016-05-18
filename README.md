@@ -13,13 +13,13 @@ npm
     d.description);
   })
   .catch(function(e) {
-    console.log('exits');
+    console.log(e);
   })
 
 npm
   .install('promisify-git')
-  .then(function(d) {
-    console.log(d,'sdfdsfdscu');
+  .then(function(pkg_infos) {
+    console.log(pkg_infos);
   })
   .catch(function(e) {
     console.log(e);
