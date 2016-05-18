@@ -85,7 +85,7 @@ pnpm.install = function(pkgs, abs_where) {
     });
 }
 
-pnpm.unInstall = function(pkgs, abs_where) {
+pnpm.unInstalled = function(pkgs, abs_where) {
   if(pkgs.constructor.name === 'String') pkgs = [pkgs];
   var configs = {};
 
@@ -120,6 +120,16 @@ pnpm.hasInstalled = function(pkgs, abs_where) {
     .then(function() {
       return Promise.fromCallback(function(node_cb) {
         npm.commands.list(pkgs, true, node_cb);
+      })
+      .get('dependencies')
+      .then(function(deps) {
+        var installPkgs = Object.keys(deps)
+        var unInstallPkgs = pkgs.filter(function (pkg_name){
+          return ! ~ installPkgs.indexOf(pkg_name)
+        })
+        if(unInstallPkgs.length){
+          throw new Error('These package have not been installed yet -> ' + unInstallPkgs)
+        }
       })
     });
 }
