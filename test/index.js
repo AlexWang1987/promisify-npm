@@ -9,14 +9,13 @@ var npm = require('../index.js');
 //     console.log('exits');
 //   })
 
-
-  npm
-    .hasInstalled(['promisify-git','promisify-fs'],'/Users/xxx/xx')
-    .then(function(d) {
-      console.log(d);
-    }).catch(function(e) {
-      console.log(e);
-    })
+  // npm
+  //   .hasInstalled(['promisify-git','promisify-fs'],'/Users/xxx/xx')
+  //   .then(function(d) {
+  //     console.log(d);
+  //   }).catch(function(e) {
+  //     console.log(e);
+  //   })
 
 // npm
 //   .initDefaultPkg()
