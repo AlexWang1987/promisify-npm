@@ -8,7 +8,7 @@ var path = require('path');
  */
 var pnpm = module.exports = {};
 
-var npmLoadConfig = function(config) {
+pnpm.npmLoadConfig = function(config) {
   return Promise.fromCallback(function(node_cb) {
     //Loading Config Files
     npm.load(config, node_cb);
@@ -27,12 +27,10 @@ pnpm.initDefaultPkg = function(abs_where, options) {
     //name is required for all npm packages
     if(options && !options['name']) options['name'] = pkg_name;
 
-    return fs.existsFile(pkg_path)
-      .reflect()
-      .call('isRejected')
-      .then(function(isRejected) {
-        //pkg file exits.
-        if(isRejected) {
+    return fs.fileExists(pkg_path)
+      .then(function(file_stat) {
+        //pkg doest not exits.
+        if(! file_stat) {
           return fs.writeFile(pkg_path, options || {
             name: pkg_name,
             description: "This is a default package.json created by wbp"
@@ -40,12 +38,10 @@ pnpm.initDefaultPkg = function(abs_where, options) {
             space: '  ' //2 prettier spaces
           })
         }
-
-        return new Error('package file exits, ignore')
       })
   } else {
     //default npm init behavior
-    return npmLoadConfig({
+    return pnpm.npmLoadConfig({
         yes: true
       })
       .then(function() {
@@ -58,7 +54,7 @@ pnpm.initDefaultPkg = function(abs_where, options) {
 }
 
 pnpm.getPkgInfo = function(pkg_name) {
-  return npmLoadConfig()
+  return pnpm.npmLoadConfig()
     .then(function() {
       return Promise.fromCallback(function(node_cb) {
         if(!pkg_name) return new Error('pkg_name is undefined');
@@ -75,8 +71,16 @@ pnpm.getPkgInfo = function(pkg_name) {
 pnpm.install = function(pkgs, abs_where) {
   if(pkgs.constructor.name === 'String') pkgs = [pkgs];
 
-  return npmLoadConfig({
-      save: true
+  return new Promise(function(resolve, reject) {
+      if(abs_where) {
+        resolve(pnpm.initDefaultPkg(abs_where))
+      }
+    })
+    .then(function() {
+      return pnpm.npmLoadConfig({
+        save: true,
+        savePrefix: '~'
+      })
     })
     .then(function() {
       return Promise.fromCallback(function(node_cb) {
@@ -97,7 +101,7 @@ pnpm.uninstall = function(pkgs, abs_where) {
   //save dependencies
   configs.save = true;
 
-  return npmLoadConfig(configs)
+  return pnpm.npmLoadConfig(configs)
     .then(function() {
       return Promise.fromCallback(function(node_cb) {
         npm.commands.uninstall(pkgs, node_cb);
@@ -116,20 +120,20 @@ pnpm.hasInstalled = function(pkgs, abs_where) {
     configs.prefix = abs_where;
   }
 
-  return npmLoadConfig(configs)
+  return pnpm.npmLoadConfig(configs)
     .then(function() {
       return Promise.fromCallback(function(node_cb) {
-        npm.commands.list(pkgs, true, node_cb);
-      })
-      .get('dependencies')
-      .then(function(deps) {
-        var installPkgs = Object.keys(deps)
-        var unInstallPkgs = pkgs.filter(function (pkg_name){
-          return ! ~ installPkgs.indexOf(pkg_name)
+          npm.commands.list(pkgs, true, node_cb);
         })
-        if(unInstallPkgs.length){
-          throw new Error('These package have not been installed yet -> ' + unInstallPkgs)
-        }
-      })
+        .get('dependencies')
+        .then(function(deps) {
+          var installPkgs = Object.keys(deps)
+          var unInstallPkgs = pkgs.filter(function(pkg_name) {
+            return !~installPkgs.indexOf(pkg_name)
+          })
+          if(unInstallPkgs.length) {
+            throw new Error('These package have not been installed yet -> ' + unInstallPkgs)
+          }
+        })
     });
 }
