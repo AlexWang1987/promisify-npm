@@ -85,7 +85,7 @@ pnpm.install = function(pkgs, abs_where) {
     });
 }
 
-pnpm.unInstalled = function(pkgs, abs_where) {
+pnpm.uninstall = function(pkgs, abs_where) {
   if(pkgs.constructor.name === 'String') pkgs = [pkgs];
   var configs = {};
 

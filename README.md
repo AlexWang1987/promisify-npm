@@ -26,7 +26,7 @@ npm
   })
 
 npm
-  .uninstall(['promisify-git','react'],'/something/folder/xx')
+  .unInstalled(['promisify-git','react'],'/something/folder/xx')
   .then(function(d) {
     console.log(d);
   })
@@ -36,9 +36,12 @@ npm
 ```
 
 #API
+//pkgs could be a string or array
 
 * getPkgInfo(pkg_name)
-* install(pkgs [,where]) pkgs could be a string or array
-* uninstall(pkgs [,where]) pkgs could be a string or array
+* install(pkgs [,where])
+* uninstall(pkgs [,where])
+* hasInstalled(pkgs,[,where])
+
 
 coutinuing...
