@@ -10,11 +10,25 @@ var pnpm = module.exports = {};
 
 pnpm.npmLoadConfig = function(config) {
   return Promise.fromCallback(function(node_cb) {
+    //default config
+    var defaultConf = config || {};
+
+    //debuggable
+    defaultConf['loglevel'] = defaultConf['loglevel'] || 'info';
+    defaultConf['save'] = defaultConf['save'] || true;
+    defaultConf['savePrefix'] = defaultConf['savePrefix'] || '~';
+
     //Loading Config Files
-    npm.load(config, node_cb);
+    npm.load(defaultConf, node_cb);
   })
 }
 
+/**
+ * init a package
+ * @param  {string} abs_where absolute path
+ * @param  {object} options   package info settings
+ * @return {promise}           promise
+ */
 pnpm.initDefaultPkg = function(abs_where, options) {
   //custom my own default package file
   if(abs_where) {
@@ -30,10 +44,13 @@ pnpm.initDefaultPkg = function(abs_where, options) {
     return fs.fileExists(pkg_path)
       .then(function(file_stat) {
         //pkg doest not exits.
-        if(! file_stat) {
+        if(!file_stat) {
           return fs.writeFile(pkg_path, options || {
             name: pkg_name,
-            description: "This is a default package.json created by wbp"
+            description: "This is a default package.json created by wbp",
+            version: "1.0.0",
+            repository: {},
+            license: "MIT"
           }, {
             space: '  ' //2 prettier spaces
           })
@@ -53,6 +70,11 @@ pnpm.initDefaultPkg = function(abs_where, options) {
   }
 }
 
+/**
+ * to get package's info from the registry
+ * @param  {string} pkg_name package's name
+ * @return {promise}          package info as JSON object
+ */
 pnpm.getPkgInfo = function(pkg_name) {
   return pnpm.npmLoadConfig()
     .then(function() {
@@ -68,19 +90,31 @@ pnpm.getPkgInfo = function(pkg_name) {
     })
 }
 
+/**
+ * to install packages at current directory or particular place
+ * @param  {string/array} pkgs      single or multiple packages
+ * @param  {path} abs_where  it is a optional
+ * @return {promise}
+ */
 pnpm.install = function(pkgs, abs_where) {
   if(pkgs.constructor.name === 'String') pkgs = [pkgs];
 
-  return new Promise(function(resolve, reject) {
+  return Promise.try(function() {
       if(abs_where) {
-        resolve(pnpm.initDefaultPkg(abs_where))
+        return fs
+          .folderExists(abs_where)
+          .then(function(stat) {
+            if(!stat) {
+              return fs.addFolder(abs_where)
+                .then(function() {
+                  return pnpm.initDefaultPkg(abs_where)
+                })
+            }
+          })
       }
     })
     .then(function() {
-      return pnpm.npmLoadConfig({
-        save: true,
-        savePrefix: '~'
-      })
+      return pnpm.npmLoadConfig()
     })
     .then(function() {
       return Promise.fromCallback(function(node_cb) {
@@ -89,6 +123,12 @@ pnpm.install = function(pkgs, abs_where) {
     });
 }
 
+/**
+ * uninstall packages from current directory(default) or some where
+ * @param  {string/array} pkgs     packages you want to remove
+ * @param  {place}      abs_where which is optional
+ * @return {promise}
+ */
 pnpm.uninstall = function(pkgs, abs_where) {
   if(pkgs.constructor.name === 'String') pkgs = [pkgs];
   var configs = {};
@@ -98,9 +138,6 @@ pnpm.uninstall = function(pkgs, abs_where) {
     configs.prefix = abs_where;
   }
 
-  //save dependencies
-  configs.save = true;
-
   return pnpm.npmLoadConfig(configs)
     .then(function() {
       return Promise.fromCallback(function(node_cb) {
@@ -109,6 +146,12 @@ pnpm.uninstall = function(pkgs, abs_where) {
     });
 }
 
+/**
+ * where it has install all packages
+ * @param  {string/array}  pkgs      packages
+ * @param  {string}  abs_where the place to test
+ * @return {promise}           promise/true/false
+ */
 pnpm.hasInstalled = function(pkgs, abs_where) {
   if(pkgs.constructor.name === 'String') pkgs = [pkgs];
   var configs = {
@@ -127,13 +170,10 @@ pnpm.hasInstalled = function(pkgs, abs_where) {
         })
         .get('dependencies')
         .then(function(deps) {
-          var installPkgs = Object.keys(deps)
-          var unInstallPkgs = pkgs.filter(function(pkg_name) {
-            return !~installPkgs.indexOf(pkg_name)
-          })
-          if(unInstallPkgs.length) {
-            throw new Error('These package have not been installed yet -> ' + unInstallPkgs)
-          }
+          var targetPkgs = Object.keys(deps);
+          return pkgs.reduce(function(last, pkg) {
+            return last && !!~targetPkgs.indexOf(pkg)
+          }, true)
         })
     });
 }

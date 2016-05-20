@@ -28,6 +28,6 @@
   "dependencies": {
     "bluebird": "^3.4.0",
     "npm": "^3.9.0",
-    "promisify-fs": "^1.0.12"
+    "promisify-fs": "^1.0.21"
   }
 }

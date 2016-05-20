@@ -1,16 +1,16 @@
 var npm = require('../index.js');
 
 npm
-  .uninstall('promisify-bash',__dirname)
+  .hasInstalled(['promisify-fetch','promisify-bash'],'/Users/AlexWang/xx')
   .then(function(d) {
-    console.log('1->',d);
+    console.log(d);
   })
   .catch(function(e) {
-    console.log('2->',e);
+    console.error('catch->', e);
   })
 
   // npm
-  //   .hasInstalled(['promisify-git','promisify-fs'],'/Users/xxx/xx')
+  //   .hasInstalled(['promisify-git','promisify-fs','bluebird'],'/Users/AlexWang/xx')
   //   .then(function(d) {
   //     console.log(d);
   //   }).catch(function(e) {

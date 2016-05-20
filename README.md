@@ -36,7 +36,8 @@ npm
 ```
 
 # API
-The param `pkgs` could be a string or array which is supporting batch operations.
+The param `pkgs` could be a  `string` or `array` which is supporting batch operations.
+
 The param `where` is designed for specific purpose if you'd like to install packages as you want. default is `process.cwd`
 
 * getPkgInfo(pkg_name)
