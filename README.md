@@ -49,4 +49,9 @@ coutinuing...
 
 This library is under developing, All API might be changed for some reasons. So, be cautious using it.
 
-
+# Good Library Companions
+# [promisify-cli](https://www.npmjs.com/package/promisify-cli)
+# [promisify-bash](https://www.npmjs.com/package/promisify-bash)
+# [promisify-fs](https://www.npmjs.com/package/promisify-fs)
+# [promsifiy-git](https://www.npmjs.com/package/promisify-git)
+# [promsifiy-fetch](https://www.npmjs.com/package/promisify-fetch)
