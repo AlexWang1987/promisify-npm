@@ -37,29 +37,22 @@ pnpm.npmInit = function (config) {
 pnpm.initDefaultPkg = function (abs_where, package_json) {
   var package_abs_path = (abs_where || process.cwd()) + '/package.json';
   var prefix = path.dirname(package_abs_path);
-  return fs
-    .fileExists(package_abs_path)
-    .then(function (file_stat) {
-      if (!file_stat) {
-        return pnpm.npmInit({
-            yes: true,
-            localPrefix: prefix,
-            prefix: prefix
-          })
-          .then(function () {
-            return Promise.fromCallback(function (node_cb) {
-              npm.commands.init(node_cb);
-            })
-          })
-          .then(function (init_package_json) {
-            return package_json ?
-              fs.writeFile(package_abs_path, Object.assign({}, init_package_json, package_json), {
-                space: '  '
-              }) :
-              init_package_json
-          })
-      }
-      console.log(package_abs_path + ' exists, It will ignore.');
+  return pnpm.npmInit({
+      yes: true,
+      localPrefix: prefix,
+      prefix: prefix
+    })
+    .then(function () {
+      return Promise.fromCallback(function (node_cb) {
+        npm.commands.init(node_cb);
+      })
+    })
+    .then(function (init_package_json) {
+      return package_json ?
+        fs.writeFile(package_abs_path, Object.assign({}, init_package_json, package_json), {
+          space: '  '
+        }) :
+        init_package_json
     })
 }
 

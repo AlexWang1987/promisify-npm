@@ -44,6 +44,7 @@ The param `where` is designed for specific purpose if you'd like to install pack
 * install(pkgs [,where])
 * uninstall(pkgs [,where])
 * hasInstalled(pkgs,[,where])
+* initDefaultPkg([where],[packageJson])
 
 coutinuing...
 
