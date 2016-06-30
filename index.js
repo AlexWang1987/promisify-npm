@@ -1,3 +1,4 @@
+/*eslint-disable*/
 var Promise = require('bluebird');
 var fs = require('promisify-fs');
 var npm = require('npm');
@@ -8,8 +9,12 @@ var path = require('path');
  */
 var pnpm = module.exports = {};
 
-pnpm.npmLoadConfig = function(config) {
-  return Promise.fromCallback(function(node_cb) {
+/**
+ * init npm before using it.
+ * @return promise
+ */
+pnpm.npmInit = function (config) {
+  return Promise.fromCallback(function (node_cb) {
     //default config
     var defaultConf = config || {};
 
@@ -29,64 +34,32 @@ pnpm.npmLoadConfig = function(config) {
  * @param  {object} options   package info settings
  * @return {promise}           promise
  */
-pnpm.initDefaultPkg = function(abs_where, options) {
-  //custom my own default package file
-  if(abs_where) {
-    var pkg_path = path.resolve(abs_where, 'package.json');
-
-    //default settings
-    var abs_where = path.resolve(abs_where);
-    var pkg_name = abs_where.slice(abs_where.lastIndexOf('/') + 1);
-
-    //name is required for all npm packages
-    if(options && !options['name']) options['name'] = pkg_name;
-
-    return fs.fileExists(pkg_path)
-      .then(function(file_stat) {
-        //pkg doest not exits.
-        if(!file_stat) {
-          return fs.writeFile(pkg_path, options || {
-            name: pkg_name,
-            description: "This is a default package.json created by wbp",
-            version: "1.0.0",
-            repository: {},
-            license: "MIT"
-          }, {
-            space: '  ' //2 prettier spaces
+pnpm.initDefaultPkg = function (abs_where, package_json) {
+  var package_abs_path = (abs_where || process.cwd()) + '/package.json';
+  var prefix = path.dirname(package_abs_path);
+  return fs
+    .fileExists(package_abs_path)
+    .then(function (file_stat) {
+      if (!file_stat) {
+        return pnpm.npmInit({
+            yes: true,
+            localPrefix: prefix,
+            prefix: prefix
           })
-        }
-      })
-  } else {
-    //default npm init behavior
-    return pnpm.npmLoadConfig({
-        yes: true
-      })
-      .then(function() {
-        return Promise.fromCallback(function(node_cb) {
-          //load package info from registry
-          npm.commands.init(node_cb);
-        })
-      })
-  }
-}
-
-/**
- * to get package's info from the registry
- * @param  {string} pkg_name package's name
- * @return {promise}          package info as JSON object
- */
-pnpm.getPkgInfo = function(pkg_name) {
-  return pnpm.npmLoadConfig()
-    .then(function() {
-      return Promise.fromCallback(function(node_cb) {
-        if(!pkg_name) return new Error('pkg_name is undefined');
-
-        //load package info from registry
-        npm.commands.view([pkg_name], true, node_cb);
-      })
-    })
-    .then(function(kvInfo) {
-      return kvInfo[Object.keys(kvInfo)[0]]
+          .then(function () {
+            return Promise.fromCallback(function (node_cb) {
+              npm.commands.init(node_cb);
+            })
+          })
+          .then(function (init_package_json) {
+            return package_json ?
+              fs.writeFile(package_abs_path, Object.assign({}, init_package_json, package_json), {
+                space: '  '
+              }) :
+              init_package_json
+          })
+      }
+      console.log(package_abs_path + ' exists, It will ignore.');
     })
 }
 
@@ -96,28 +69,28 @@ pnpm.getPkgInfo = function(pkg_name) {
  * @param  {path} abs_where  it is a optional
  * @return {promise}
  */
-pnpm.install = function(pkgs, abs_where) {
-  if(pkgs.constructor.name === 'String') pkgs = [pkgs];
+pnpm.install = function (pkgs, abs_where) {
+  if (pkgs.constructor.name === 'String') pkgs = [pkgs];
 
-  return Promise.try(function() {
-      if(abs_where) {
+  return Promise.try(function () {
+      if (abs_where) {
         return fs
           .folderExists(abs_where)
-          .then(function(stat) {
-            if(!stat) {
+          .then(function (stat) {
+            if (!stat) {
               return fs.addFolder(abs_where)
-                .then(function() {
+                .then(function () {
                   return pnpm.initDefaultPkg(abs_where)
                 })
             }
           })
       }
     })
-    .then(function() {
-      return pnpm.npmLoadConfig()
+    .then(function () {
+      return pnpm.npmInit()
     })
-    .then(function() {
-      return Promise.fromCallback(function(node_cb) {
+    .then(function () {
+      return Promise.fromCallback(function (node_cb) {
         npm.commands.install(abs_where, pkgs, node_cb);
       })
     });
@@ -129,18 +102,18 @@ pnpm.install = function(pkgs, abs_where) {
  * @param  {place}      abs_where which is optional
  * @return {promise}
  */
-pnpm.uninstall = function(pkgs, abs_where) {
-  if(pkgs.constructor.name === 'String') pkgs = [pkgs];
+pnpm.uninstall = function (pkgs, abs_where) {
+  if (pkgs.constructor.name === 'String') pkgs = [pkgs];
   var configs = {};
 
-  if(abs_where) {
+  if (abs_where) {
     configs.localPrefix = abs_where;
     configs.prefix = abs_where;
   }
 
-  return pnpm.npmLoadConfig(configs)
-    .then(function() {
-      return Promise.fromCallback(function(node_cb) {
+  return pnpm.npmInit(configs)
+    .then(function () {
+      return Promise.fromCallback(function (node_cb) {
         npm.commands.uninstall(pkgs, node_cb);
       })
     });
@@ -152,28 +125,45 @@ pnpm.uninstall = function(pkgs, abs_where) {
  * @param  {string}  abs_where the place to test
  * @return {promise}           promise/true/false
  */
-pnpm.hasInstalled = function(pkgs, abs_where) {
-  if(pkgs.constructor.name === 'String') pkgs = [pkgs];
-  var configs = {
-    depth: 0
-  }
-
-  if(abs_where) {
-    configs.localPrefix = abs_where;
-    configs.prefix = abs_where;
-  }
-
-  return pnpm.npmLoadConfig(configs)
-    .then(function() {
-      return Promise.fromCallback(function(node_cb) {
-          npm.commands.list(pkgs, true, node_cb);
-        })
-        .get('dependencies')
-        .then(function(deps) {
-          var targetPkgs = Object.keys(deps);
-          return pkgs.reduce(function(last, pkg) {
-            return last && !!~targetPkgs.indexOf(pkg)
-          }, true)
-        })
-    });
+pnpm.hasInstalled = function (pkgs, abs_where) {
+  if (pkgs.constructor.name === 'String') pkgs = [pkgs];
+  var package_abs_path = (abs_where || process.cwd()) + '/package.json';
+  return fs.fileExists(package_abs_path)
+    .then(function (file_stat) {
+      if (file_stat) {
+        return fs
+          .readFile(package_abs_path)
+          .then(JSON.parse)
+          .get('dependencies')
+          .then(function (deps) {
+            if (deps) {
+              var targetPkgs = Object.keys(deps);
+              return pkgs.reduce(function (last, pkg) {
+                return last && !!~targetPkgs.indexOf(pkg)
+              }, true)
+            }
+          })
+      }
+    })
 }
+
+/**
+ * to get package's info from the registry
+ * @param  {string} pkg_name package's name
+ * @return {promise}          package info as JSON object
+ */
+pnpm.getPkgInfo = function (pkg_name) {
+  return pnpm.npmInit()
+    .then(function () {
+      return Promise.fromCallback(function (node_cb) {
+        if (!pkg_name) return new Error('pkg_name is undefined');
+
+        //load package info from registry
+        npm.commands.view([pkg_name], true, node_cb);
+      })
+    })
+    .then(function (kvInfo) {
+      return kvInfo[Object.keys(kvInfo)[0]]
+    })
+}
+
