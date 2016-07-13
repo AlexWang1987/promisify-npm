@@ -1,4 +1,5 @@
 var npm = require('../index.js');
+var path = require('path');
 
 // npm
 //   .hasInstalled(['promisify-fetch','promisify-bash'],'/Users/AlexWang/xx')
@@ -18,9 +19,7 @@ var npm = require('../index.js');
 //   })
 
 npm
-  .initDefaultPkg(null, {
-    description: 'create by alex'
-  })
+  .initDefaultPkg()
   .then(function (d) {
     console.log(d);
   })
