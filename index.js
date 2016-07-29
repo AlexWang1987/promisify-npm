@@ -2,7 +2,6 @@
 var Promise = require('bluebird');
 var fs = require('promisify-fs');
 var bash = require('promisify-bash');
-var npm = require('npm');
 var path = require('path');
 
 /**

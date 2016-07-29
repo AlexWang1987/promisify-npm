@@ -27,8 +27,8 @@
   "homepage": "https://github.com/AlexWang1987/promisify-npm#readme",
   "dependencies": {
     "bluebird": "^3.4.0",
-    "npm": "^3.9.0",
     "promisify-bash": "^1.0.6",
     "promisify-fs": "^1.0.36"
   }
 }
+
