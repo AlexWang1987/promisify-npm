@@ -75,7 +75,8 @@ pnpm.initDefaultPkg = function (abs_where, package_json) {
 pnpm.install = function (pkg, abs_where) {
   var cwd = abs_where || process.cwd();
   return bnpm('install ' + pkg + ' -S', {
-    cwd: cwd
+    cwd: cwd,
+    maxBuffer: 10 * 1024 * 1024 //10M default-Size:200*1024
   });
 }
 
