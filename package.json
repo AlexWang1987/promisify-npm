@@ -1,6 +1,6 @@
 {
   "name": "promisify-npm",
-  "version": "1.0.20",
+  "version": "1.0.21",
   "description": "The library is mainly used to operate npm daily routines in your application.  perfect for making efficient tools.",
   "main": "index.js",
   "scripts": {
