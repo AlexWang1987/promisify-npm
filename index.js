@@ -101,15 +101,18 @@ pnpm.uninstall = function (pkgs, abs_where) {
  */
 pnpm.hasInstalled = function (pkg, abs_where) {
   var package_abs_path = (abs_where || process.cwd());
-  var packageModule = fs.getModule(package_abs_path);
-  if (packageModule) {
-    return fs
-      .getModulePackInfo(packageModule)
-      .get('dependencies')
-      .then(function (deps) {
-        return (deps && deps[pkg]);
-      });
-  }
+  return Promise.try(function () {
+    var packageModule = fs.getModule(package_abs_path);
+    if (packageModule) {
+      return fs
+        .getModulePackInfo(packageModule)
+        .get('dependencies')
+        .then(function (deps) {
+          return (deps && deps[pkg]);
+        });
+    }
+    throw package_abs_path + ' can not be resolved!';
+  })
 }
 
 /**
