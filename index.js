@@ -112,3 +112,16 @@ pnpm.hasInstalled = function (pkg, abs_where) {
   }
 }
 
+/**
+ * @method getLatestTag
+ * @param  {string}     pkg_name
+ * @return {promise}
+ */
+pnpm.getLatestTag = function (pkg_name) {
+  return bnpm('view ' + pkg_name + ' -s --json', {
+      liveStdout: false
+    })
+    .then(JSON.parse)
+    .get('version')
+}
+

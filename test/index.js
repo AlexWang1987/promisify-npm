@@ -2,7 +2,7 @@ var npm = require('../index.js');
 var path = require('path');
 
 npm
-  .hasInstalled('shelljs', '/Users/AlexWang/ws/promisify-fs')
+  .getLatestTag('shelljs')
   .then(function (d) {
     console.log('data->', d);
   })
