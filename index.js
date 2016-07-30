@@ -100,13 +100,15 @@ pnpm.uninstall = function (pkgs, abs_where) {
  * @return {promise}           promise/true/false
  */
 pnpm.hasInstalled = function (pkg, abs_where) {
-  var package_abs_path = (abs_where || process.cwd()) + '/package.json';
-  return fs
-    .readFile(package_abs_path)
-    .then(JSON.parse)
-    .get('dependencies')
-    .then(function (deps) {
-      return Boolean(deps && deps[pkg]);
-    })
+  var package_abs_path = (abs_where || process.cwd());
+  var packageModule = fs.getModule(package_abs_path);
+  if (packageModule) {
+    return fs
+      .getModulePackInfo(packageModule)
+      .get('dependencies')
+      .then(function (deps) {
+        return (deps && deps[pkg]);
+      });
+  }
 }
 

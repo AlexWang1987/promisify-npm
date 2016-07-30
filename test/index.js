@@ -1,14 +1,14 @@
 var npm = require('../index.js');
 var path = require('path');
 
-// npm
-//   .hasInstalled(['promisify-fetch','promisify-bash'],'/Users/AlexWang/xx')
-//   .then(function(d) {
-//     console.log(d);
-//   })
-//   .catch(function(e) {
-//     console.error('catch->', e);
-//   })
+npm
+  .hasInstalled('shelljs', '/Users/AlexWang/ws/promisify-fs')
+  .then(function (d) {
+    console.log('data->', d);
+  })
+  .catch(function (e) {
+    console.error('catch->', e);
+  })
 
 // npm
 //   .hasInstalled(['promisify-git','promisify-fs','bluebird'],'/Users/AlexWang/xx')
@@ -18,9 +18,9 @@ var path = require('path');
 //     console.log(e);
 //   })
 
-npm
-  .initDefaultPkg()
-  .then(function (d) {
-    console.log(d);
-  })
+// npm
+//   .initDefaultPkg()
+//   .then(function (d) {
+//     console.log(d);
+//   })
 
